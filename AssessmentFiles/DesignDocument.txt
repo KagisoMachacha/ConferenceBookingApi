@@ -1,0 +1,125 @@
+Conference Booking API Design Document
+
+
+This document explains the architecture and design decisions for the Conference Booking API. 
+It covers database design and normalization, application logic and constraints, concurrency handling for bookings, 
+scaling strategies, and improvements I would make given more time.
+
+1.1 Database design
+Main entities
+
+Room
+ - Id (GUID) PK
+ - Name (string)
+ - Capacity (int)
+ - Location (string) optional
+ - CreatedAt (DateTimeOffset)
+ - UpdatedAt (DateTimeOffset)
+
+RoomAmenity
+ - Id (GUID) PK
+ - RoomId (GUID) FK -> Room.Id
+ - Amenity (string)
+(Navigation property Room for EF Core)
+
+Example: "Projector", "Whiteboard"
+
+Booking
+ - Id (GUID) PK
+ - RoomId (GUID) FK -> Room.Id
+ - UserId (GUID) or BookedBy (string/email) who created the booking
+ - StartTime (DateTimeOffset)
+ - EndTime (DateTimeOffset)
+ - AttendeesCount (int)
+ - Status (enum) e.g., Confirmed, Cancelled, Pending
+ - CreatedAt / UpdatedAt
+RowVersion (byte[]) concurrency token (for optimistic concurrency)
+
+
+1.2 Normalization rationale
+ - The schema is normalized to at least 3NF:
+ - Rooms are a single record; amenities are separate rows in RoomAmenity to avoid repeating amenity columns.
+ - Bookings reference Room via foreign key; booking details (times, attendees) are contained in Booking and cannot be derived from other entities.
+ - This avoids update anomalies (e.g., changing Room name in one place) and simplifies queries (select rooms with amenities via joins).
+
+
+2.1 Constraints
+ - Foreign keys: Booking.RoomId -> Room.Id, RoomAmenity.RoomId -> Room.Id.
+ - Not null constraints on required fields (StartTime/EndTime/RoomId).
+Check constraints:
+ - EndTime > StartTime.
+ - AttendeesCount >= 1 AND AttendeesCount <= Room.Capacity enforced at application layer and optionally via DB trigger or CHECK referencing capacity 
+ (DB-side enforcement across tables may require triggers or computed columns).
+Indexes:
+ - Bookings(RoomId, StartTime) for quick lookup of bookings by room/time.
+ - Bookings(RoomId, StartTime, EndTime) (composite) helps overlap checks.
+ - Rooms(Name) if common lookup.
+Concurrency token: RowVersion (SQL Server rowversion / timestamp) used for optimistic concurrency.
+
+2.2 Application logic
+ - 2.1 Validation & business rules (application layer)
+ - Validate request DTOs (server-side model validation).
+
+Example rules:
+ - StartTime and EndTime are in the future (or at least StartTime >= now depending on business rule).
+ - EndTime > StartTime.
+ - AttendeesCount <= Room.Capacity.
+ - Booking cutoff: e.g., "bookings cannot be created after 17:00 (5pm)" enforce on create/update.
+
+Return structured errors:
+
+{
+  "error": "RoomNotFound",
+  "message": "Room with the provided ID does not exist.",
+  "validationErrors": null
+}
+
+(Use consistent error schema for all endpoints.)
+
+2.3 Concurrency & preventing double bookings
+
+Handling concurrent booking requests is critical. Several strategies are combined the choice depends on DB technology (Postgres vs SQL Server) and expected load.
+
+Problem
+Two users attempt to book the same room for overlapping times simultaneously. Without proper controls, both transactions could succeed and create overlapping bookings.
+
+Strategies
+A. Database-level exclusion constraints (Postgres) preferred when using Postgres
+
+Use PostgreSQL exclusion constraint with tstzrange to prevent overlapping bookings:
+
+ALTER TABLE bookings
+ADD EXCLUDE USING gist (
+  room_id WITH =,
+  tstzrange(start_time, end_time) WITH &&
+);
+
+
+3.1 Scaling & performance
+Read vs write separation
+ - Read replicas: Offload read-heavy endpoints (room lists, amenities, booking history) to read replicas. Keep write operations 
+ (booking creation) on primary instance.
+ - Use read-after-write consistency patterns (e.g., serve immediate responses to the client from primary or return the created 
+ resource ID so client can query primary if consistency critical).
+
+3.2 Caching
+Cache static-ish or low-change data:
+ - Rooms and RoomAmenity can be cached (in Redis or in-memory) with short TTL (e.g., 5–60 minutes) and cache invalidation after updates.
+ - Use HTTP caching headers for GET endpoints (ETag/Last-Modified).
+
+3.3 Partitioning
+ - Partition bookings by time ranges or by tenant/room for very large datasets.
+ - Table partitioned by StartTime (monthly partitions) speeds queries for recent time windows and archiving older data.
+ - For multi-tenant setups, separate schemas/databases per tenant if strict isolation is needed.
+ - timeoffset in SQL Server (or timestamptz in Postgres) to avoid timezone ambiguity.
+
+3.4. What I would do differently with more time
+ - create endpoints to handle retries safely from clients.
+ - Implement distributed locking only if DB constraints are insufficient (e.g., SQL Server environment with heavy write contention).
+ - Partition bookings by date ranges to speed queries and make archiving easier.
+ - End-to-end concurrency test harness that simulates thousands of concurrent booking attempts to verify behavior.
+ - Add push notifications to inform clients when a booking they are viewing changes.
+ - automated alerting for conflict spikes, DB deadlocks; runbook for mitigation.
+
+
+
