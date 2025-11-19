@@ -1,0 +1,64 @@
+AI Usage Report
+
+1.How I used AI tools during this assessment
+
+I used AI tools to support the development of my Conference Booking API by helping me understand errors, 
+redefine validation logic, and clarify certain C# and Entity Framework Core concepts. 
+AI assisted mainly as a debugging partner and a reference tool for best-practice patterns, 
+while I handled all architectural decisions, coding, and final implementation.
+
+2.Most effective prompts/questions
+
+The prompts that worked best were those where I provided:
+ - A specific code snippet that was failing
+ - The exact error message
+ - A clear description of the expected behaviour
+
+Examples include:
+ - “Show me how to fix this DateTimeOffset vs DateTime mismatch.”
+ - “Help me implement structured error handling for this validation.”
+ - “Why does this LINQ query still insert records when the validation fails?”
+ - These produced actionable fixes instead of generic suggestions.
+
+
+3.What I validated or modified from AI suggestions
+
+I always verified suggestions by:
+ - Testing them directly in the API
+ - Checking if they aligned with REST design principles
+ - Ensuring the solution matched .NET and Entity Framework Core best practices
+
+Some AI recommendations needed adjustment, for example:
+ - Suggestions about completely changing the model types weren’t appropriate, so I instead updated the service logic only.
+ - For error handling, I refined the structure to match the assessment’s expected format.
+ - I validated that the logic prevented invalid bookings before DB save operations.
+
+
+4.Challenges AI helped solve vs. where I relied on my own expertise
+
+AI helped with:
+ - Understanding compiler errors
+ - Fixing incorrect validation paths
+ - LINQ query corrections
+ - Deciding when to use checks like AnyAsync() vs direct lookups
+ - Clarifying EF Core navigation properties
+ - Improving readability and consistency in the service layer
+
+I relied on my own expertise for:
+ - Designing the architecture of the application
+ - Deciding how entities relate (Room, Booking, RoomAmenity, etc.)
+ - Applying business rules like “no booking after 17:00”
+ - Writing the final logic flow for create/update operations
+ - Ensuring security, correctness, and adherence to the requirements
+
+
+5.Did AI help with database design? How I verified correctness
+
+AI helped mostly by explaining EF Core behaviours such as how navigation properties work and when to use RoomId vs Room. However,
+the actual design decisions (tables, foreign keys, and modelling) were done using my own reasoning and based on the problem requirements.
+
+I verified correctness by:
+ - Reviewing EF Core migration outputs
+ - Checking the generated relationships in the database
+ - Testing CRUD operations against the final schema
+ - Ensuring referential integrity (e.g., Room must exist before a Booking is created)
