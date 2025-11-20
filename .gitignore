@@ -1,0 +1,7 @@
+# Ignore build output
+bin/
+obj/
+*.dll
+*.pdb
+*.cache.json
+*.sourcelink.json
