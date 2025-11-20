@@ -1,0 +1,8 @@
+E:\mywork\ConferenceBookingSystem\tests\bin\Debug\net9.0\.msCoverageSourceRootsMapping_ConferenceBookingSystem.Tests
+E:\mywork\ConferenceBookingSystem\tests\bin\Debug\net9.0\CoverletSourceRootsMapping_ConferenceBookingSystem.Tests
+E:\mywork\ConferenceBookingSystem\tests\obj\Debug\net9.0\ConferenceBookingSystem.Tests.csproj.AssemblyReference.cache
+E:\mywork\ConferenceBookingSystem\tests\obj\Debug\net9.0\ConferenceBookingSystem.Tests.GeneratedMSBuildEditorConfig.editorconfig
+E:\mywork\ConferenceBookingSystem\tests\obj\Debug\net9.0\ConferenceBookingSystem.Tests.AssemblyInfoInputs.cache
+E:\mywork\ConferenceBookingSystem\tests\obj\Debug\net9.0\ConferenceBookingSystem.Tests.AssemblyInfo.cs
+E:\mywork\ConferenceBookingSystem\tests\obj\Debug\net9.0\ConferenceBookingSystem.Tests.csproj.CoreCompileInputs.cache
+E:\mywork\ConferenceBookingSystem\tests\obj\Debug\net9.0\ConferenceBookingSystem.Tests.sourcelink.json

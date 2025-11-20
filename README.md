@@ -31,8 +31,8 @@ dotnet tool install --global dotnet-ef
 dotnet restore
 
 # Or manually install packages if needed:
-dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL --version 9.0.2
-dotnet add package Microsoft.EntityFrameworkCore.Design --version 9.0.7
+dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL --version 8.0.5
+dotnet add package Microsoft.EntityFrameworkCore.Design --version 8.0.8
 dotnet add package Swashbuckle.AspNetCore --version 6.5.0
 ```
 
