@@ -8,7 +8,7 @@ A RESTful API for managing conference room bookings in a co-working space, built
 ## Prerequisites
 
 - .NET 8.0 SDK 
-- PostgreSQL 12 or later
+- PostgreSQL 8 or later
 - Your favorite IDE (Visual Studio, VS Code, Rider)
 
 ## Getting Started
@@ -25,7 +25,7 @@ cd ConferenceBookingApi
 ```bash
 # Install EF Core Tools globally
 dotnet tool install --global dotnet-ef
-# Or update: dotnet tool update --global dotnet-ef
+# Or update: dotnet tool install --global dotnet-ef --version 8.0.8
 
 # Restore project packages
 dotnet restore
@@ -48,12 +48,9 @@ Edit `appsettings.json` with your PostgreSQL credentials:
 }
 ```
 
-### 4. Create and Apply Database Migrations
+### 4. Apply Database Migrations
 
 ```bash
-# Create initial migration (if not exists)
-dotnet ef migrations add InitialCreate
-
 # Apply migrations to create database and schema
 dotnet ef database update
 ```
